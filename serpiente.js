@@ -68,12 +68,12 @@ function limpiarCanvas() {
 }
 
 // ========================================
-// TABLERO
+// DIBUJAR TABLERO
 // ========================================
 
 function dibujarTablero() {
 
-    ctx.strokeStyle = "#182848";
+    ctx.strokeStyle = "#1f4068";
 
     // LINEAS VERTICALES
 
@@ -300,7 +300,7 @@ function finalizarJuego() {
 
     document.getElementById("mensaje")
     .innerText =
-    "💀 GAME OVER - Tocaste el borde";
+    "💀 GAME OVER";
 }
 
 // ========================================
@@ -508,11 +508,12 @@ function moverSerpiente() {
 
 // ========================================
 // CAMBIAR DIRECCION
+// VALIDACION ANTI-RETROCESO
 // ========================================
 
 function cambiarDireccion(direccion) {
 
-    // EVITAR RETROCESO
+    // DERECHA -> IZQUIERDA
 
     if(
         direccionActual === "derecha" &&
@@ -521,6 +522,8 @@ function cambiarDireccion(direccion) {
         return;
     }
 
+    // IZQUIERDA -> DERECHA
+
     if(
         direccionActual === "izquierda" &&
         direccion === "derecha"
@@ -528,12 +531,16 @@ function cambiarDireccion(direccion) {
         return;
     }
 
+    // ARRIBA -> ABAJO
+
     if(
         direccionActual === "arriba" &&
         direccion === "abajo"
     ){
         return;
     }
+
+    // ABAJO -> ARRIBA
 
     if(
         direccionActual === "abajo" &&
@@ -565,7 +572,7 @@ function iniciarJuego() {
 
     document.getElementById("mensaje")
     .innerText =
-    "🔥 Snake Xtreme iniciado";
+    "🔥 Juego iniciado";
 
     clearInterval(intervaloSerpiente);
 
@@ -611,7 +618,7 @@ function reiniciarJuego() {
         { x: 2, y: 10 }
     );
 
-    // REINICIAR VARIABLES
+    // VARIABLES
 
     direccionActual = "derecha";
 
@@ -639,7 +646,7 @@ function reiniciarJuego() {
 }
 
 // ========================================
-// DECORACION GAMER
+// EFECTOS GAMER
 // ========================================
 
 function dibujarDecoracion() {
@@ -655,7 +662,7 @@ function dibujarDecoracion() {
         ctx.beginPath();
 
         ctx.fillStyle =
-        "rgba(0,255,255,0.12)";
+        "rgba(0,255,255,0.10)";
 
         ctx.arc(
             x,
@@ -670,7 +677,7 @@ function dibujarDecoracion() {
 }
 
 // ========================================
-// MENSAJE DE INICIO
+// MENSAJE INICIAL
 // ========================================
 
 function dibujarMensajeInicio() {
@@ -687,7 +694,7 @@ function dibujarMensajeInicio() {
 
     ctx.fillStyle = "#00ffff";
 
-    ctx.font = "bold 42px Arial";
+    ctx.font = "bold 40px Arial";
 
     ctx.textAlign = "center";
 
