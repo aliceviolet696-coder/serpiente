@@ -21,6 +21,10 @@ let direccionActual = "derecha";
 
 let puntaje = 0;
 
+let velocidad = 180;
+
+let gameOver = false;
+
 // ========================================
 // COMIDA
 // ========================================
@@ -55,8 +59,12 @@ dibujarTodo();
 
 function limpiarCanvas() {
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+    ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
 }
 
 // ========================================
@@ -69,7 +77,11 @@ function dibujarTablero() {
 
     // LINEAS VERTICALES
 
-    for(let x = 0; x <= canvas.width; x += TAMANIO_CELDA){
+    for(
+        let x = 0;
+        x <= canvas.width;
+        x += TAMANIO_CELDA
+    ){
 
         ctx.beginPath();
 
@@ -82,7 +94,11 @@ function dibujarTablero() {
 
     // LINEAS HORIZONTALES
 
-    for(let y = 0; y <= canvas.height; y += TAMANIO_CELDA){
+    for(
+        let y = 0;
+        y <= canvas.height;
+        y += TAMANIO_CELDA
+    ){
 
         ctx.beginPath();
 
@@ -95,14 +111,20 @@ function dibujarTablero() {
 }
 
 // ========================================
-// PINTAR CUADRADO
+// PINTAR PARTE
 // ========================================
 
-function pintarParte(lineaX, lineaY, color = "#ff0055") {
+function pintarParte(
+    lineaX,
+    lineaY,
+    color = "#ff0055"
+){
 
-    const posicionRealX = lineaX * TAMANIO_CELDA;
+    const posicionRealX =
+    lineaX * TAMANIO_CELDA;
 
-    const posicionRealY = lineaY * TAMANIO_CELDA;
+    const posicionRealY =
+    lineaY * TAMANIO_CELDA;
 
     // RELLENO
 
@@ -133,7 +155,11 @@ function pintarParte(lineaX, lineaY, color = "#ff0055") {
 
 function pintarSerpiente() {
 
-    for(let i = 0; i < serpiente.length; i++){
+    for(
+        let i = 0;
+        i < serpiente.length;
+        i++
+    ){
 
         const parte = serpiente[i];
 
@@ -175,22 +201,26 @@ function pintarComida() {
 }
 
 // ========================================
-// GENERAR NUEVA COMIDA
+// GENERAR COMIDA
 // ========================================
 
 function generarComida() {
 
     const totalColumnas =
-        canvas.width / TAMANIO_CELDA;
+    canvas.width / TAMANIO_CELDA;
 
     const totalFilas =
-        canvas.height / TAMANIO_CELDA;
+    canvas.height / TAMANIO_CELDA;
 
     comida.x =
-        Math.floor(Math.random() * totalColumnas);
+    Math.floor(
+        Math.random() * totalColumnas
+    );
 
     comida.y =
-        Math.floor(Math.random() * totalFilas);
+    Math.floor(
+        Math.random() * totalFilas
+    );
 }
 
 // ========================================
@@ -210,6 +240,67 @@ function atrapaComida() {
     }
 
     return false;
+}
+
+// ========================================
+// GAME OVER BORDES
+// ========================================
+
+function verificarGameOver() {
+
+    const cabeza = serpiente[0];
+
+    const totalColumnas =
+    canvas.width / TAMANIO_CELDA;
+
+    const totalFilas =
+    canvas.height / TAMANIO_CELDA;
+
+    // IZQUIERDA
+
+    if(cabeza.x < 0){
+
+        finalizarJuego();
+    }
+
+    // DERECHA
+
+    if(cabeza.x >= totalColumnas){
+
+        finalizarJuego();
+    }
+
+    // ARRIBA
+
+    if(cabeza.y < 0){
+
+        finalizarJuego();
+    }
+
+    // ABAJO
+
+    if(cabeza.y >= totalFilas){
+
+        finalizarJuego();
+    }
+}
+
+// ========================================
+// FINALIZAR JUEGO
+// ========================================
+
+function finalizarJuego() {
+
+    gameOver = true;
+
+    clearInterval(intervaloSerpiente);
+
+    document.getElementById("estado")
+    .innerText = "GAME OVER";
+
+    document.getElementById("mensaje")
+    .innerText =
+    "💀 GAME OVER - Tocaste el borde";
 }
 
 // ========================================
@@ -299,7 +390,7 @@ function moverAbajo() {
 function crecerSerpiente() {
 
     const cola =
-        serpiente[serpiente.length - 1];
+    serpiente[serpiente.length - 1];
 
     let nuevaParte = {};
 
@@ -352,9 +443,12 @@ function crecerSerpiente() {
 
 function moverSerpiente() {
 
-    console.log("moviendo");
+    if(gameOver){
 
-    // DIRECCIONES
+        return;
+    }
+
+    // MOVIMIENTO
 
     if(direccionActual === "derecha"){
 
@@ -376,7 +470,11 @@ function moverSerpiente() {
         moverAbajo();
     }
 
-    // ATRAPAR COMIDA
+    // GAME OVER
+
+    verificarGameOver();
+
+    // COMIDA
 
     if(atrapaComida()){
 
@@ -388,6 +486,21 @@ function moverSerpiente() {
         crecerSerpiente();
 
         generarComida();
+
+        // AUMENTAR VELOCIDAD
+
+        if(velocidad > 60){
+
+            velocidad -= 10;
+
+            clearInterval(intervaloSerpiente);
+
+            intervaloSerpiente =
+            setInterval(
+                moverSerpiente,
+                velocidad
+            );
+        }
     }
 
     dibujarTodo();
@@ -399,11 +512,41 @@ function moverSerpiente() {
 
 function cambiarDireccion(direccion) {
 
+    // EVITAR RETROCESO
+
+    if(
+        direccionActual === "derecha" &&
+        direccion === "izquierda"
+    ){
+        return;
+    }
+
+    if(
+        direccionActual === "izquierda" &&
+        direccion === "derecha"
+    ){
+        return;
+    }
+
+    if(
+        direccionActual === "arriba" &&
+        direccion === "abajo"
+    ){
+        return;
+    }
+
+    if(
+        direccionActual === "abajo" &&
+        direccion === "arriba"
+    ){
+        return;
+    }
+
     direccionActual = direccion;
 
     document.getElementById("mensaje")
     .innerText =
-    "➡ Dirección actual: " + direccion;
+    "➡ Dirección: " + direccion;
 }
 
 // ========================================
@@ -412,18 +555,25 @@ function cambiarDireccion(direccion) {
 
 function iniciarJuego() {
 
+    if(gameOver){
+
+        return;
+    }
+
     document.getElementById("estado")
     .innerText = "PLAYING";
 
     document.getElementById("mensaje")
-    .innerText = "🔥 Juego iniciado";
-
-    // EVITAR MULTIPLES INTERVALOS
+    .innerText =
+    "🔥 Snake Xtreme iniciado";
 
     clearInterval(intervaloSerpiente);
 
     intervaloSerpiente =
-    setInterval(moverSerpiente, 200);
+    setInterval(
+        moverSerpiente,
+        velocidad
+    );
 }
 
 // ========================================
@@ -438,7 +588,8 @@ function pausarJuego() {
     .innerText = "PAUSE";
 
     document.getElementById("mensaje")
-    .innerText = "⏸ Juego pausado";
+    .innerText =
+    "⏸ Juego pausado";
 }
 
 // ========================================
@@ -449,6 +600,8 @@ function reiniciarJuego() {
 
     clearInterval(intervaloSerpiente);
 
+    // LIMPIAR SERPIENTE
+
     serpiente.length = 0;
 
     serpiente.push(
@@ -458,9 +611,17 @@ function reiniciarJuego() {
         { x: 2, y: 10 }
     );
 
+    // REINICIAR VARIABLES
+
     direccionActual = "derecha";
 
     puntaje = 0;
+
+    velocidad = 180;
+
+    gameOver = false;
+
+    // INTERFAZ
 
     document.getElementById("puntaje")
     .innerText = puntaje;
@@ -469,7 +630,8 @@ function reiniciarJuego() {
     .innerText = "READY";
 
     document.getElementById("mensaje")
-    .innerText = "🔄 Juego reiniciado";
+    .innerText =
+    "🔄 Juego reiniciado";
 
     generarComida();
 
@@ -477,7 +639,7 @@ function reiniciarJuego() {
 }
 
 // ========================================
-// EFECTOS GAMER
+// DECORACION GAMER
 // ========================================
 
 function dibujarDecoracion() {
@@ -495,10 +657,55 @@ function dibujarDecoracion() {
         ctx.fillStyle =
         "rgba(0,255,255,0.12)";
 
-        ctx.arc(x, y, 2, 0, Math.PI * 2);
+        ctx.arc(
+            x,
+            y,
+            2,
+            0,
+            Math.PI * 2
+        );
 
         ctx.fill();
     }
+}
+
+// ========================================
+// MENSAJE DE INICIO
+// ========================================
+
+function dibujarMensajeInicio() {
+
+    ctx.fillStyle =
+    "rgba(0,0,0,0.45)";
+
+    ctx.fillRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+    ctx.fillStyle = "#00ffff";
+
+    ctx.font = "bold 42px Arial";
+
+    ctx.textAlign = "center";
+
+    ctx.fillText(
+        "SNAKE XTREME",
+        canvas.width / 2,
+        canvas.height / 2 - 20
+    );
+
+    ctx.fillStyle = "#ffffff";
+
+    ctx.font = "20px Arial";
+
+    ctx.fillText(
+        "Presiona INICIAR",
+        canvas.width / 2,
+        canvas.height / 2 + 30
+    );
 }
 
 // ========================================
@@ -516,4 +723,14 @@ function dibujarTodo() {
     pintarComida();
 
     pintarSerpiente();
+
+    // MENSAJE INICIAL
+
+    if(
+        document.getElementById("estado")
+        .innerText === "READY"
+    ){
+
+        dibujarMensajeInicio();
+    }
 }
